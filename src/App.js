@@ -7,6 +7,17 @@ import {useState, useEffect, useCallback} from"react";
 function App() {
   
   let[appointmentList, setAppointmentList] = useState([]);
+  let[query,setQuery] = useState("");
+
+  const filteredAppointments = appointmentList.filter(
+    item => {
+      return (
+        item.petName.toLowerCase().includes(query.toLowerCase()) ||
+        item.ownerName.toLowerCase().includes(query.toLowerCase()) ||
+        item.aptNotes.toLowerCase().includes(query.toLowerCase())
+      )
+    }
+  )
 
   const fetchData = useCallback(()=>{
     fetch('/data.json')
@@ -25,14 +36,20 @@ function App() {
       <h1 ClassName="text-5xl">
         <BiCalendarPlus className="inline-block text-red-400"/> Your Appointment</h1>
       <AddAppointment/>
-      <Search/>
+      <Search query={query}
+      onQueryChange={myQuery=>setQuery(myQuery)}
+      />
 
       <ul className="divided-y divide-gray-200">
-        {appointmentList
+        {filteredAppointments
           .map(appointment=>(
             <AppointmentInfo 
             key={appointment.id}
             appointment={appointment}
+            onDeleteAppointment={
+              appoinmentId =>
+                setAppointmentList(appointmentList.filter(appointment=>appointment.id!==appoinmentId))
+            }
             />
           ))}
       </ul>
